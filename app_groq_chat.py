@@ -246,62 +246,143 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Dark theme CSS styling - optimized for memory
+# Dark theme CSS styling - optimized for memory with config.toml colors
 st.markdown("""
     <style>
-    .stApp { background-color: #000 !important; color: #fff !important; }
+    /* Base theme colors matching removed config.toml */
+    :root {
+        --primary-color: #ffffff;
+        --background-color: #000000;
+        --secondary-background-color: #1a1a1a;
+        --text-color: #ffffff;
+        --dropdown-bg: #2a2a2a;
+        --dropdown-hover: #444444;
+    }
+    
+    .stApp { 
+        background-color: var(--background-color) !important; 
+        color: var(--text-color) !important; 
+    }
     #MainMenu, footer, header { visibility: hidden; }
     .main-title { 
-        color: #fff !important; font-size: 3.2rem !important; font-weight: 700 !important;
+        color: var(--text-color) !important; font-size: 3.2rem !important; font-weight: 700 !important;
         text-align: center !important; margin: 0 !important; padding: 1.5rem 0 !important;
-        background: linear-gradient(135deg, #fff 0%, #e0e0e0 100%) !important;
+        background: linear-gradient(135deg, var(--primary-color) 0%, #e0e0e0 100%) !important;
         -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important;
     }
-    .css-1d391kg, .css-1cypcdb, [data-testid="stSidebar"] { background-color: #1a1a1a !important; }
-    .stSelectbox label, .stTextInput label, .stTextArea label { color: #fff !important; }
+    
+    /* Sidebar and containers */
+    .css-1d391kg, .css-1cypcdb, [data-testid="stSidebar"] { 
+        background-color: var(--secondary-background-color) !important; 
+    }
+    
+    /* Form elements - preserve transparent backgrounds for labels */
+    .stSelectbox label, .stTextInput label, .stTextArea label { 
+        color: var(--text-color) !important; 
+        background: transparent !important;
+    }
     .stSelectbox div[data-baseweb="select"] > div, .stTextInput input, .stTextArea textarea {
-        background-color: #2a2a2a !important; border: 1px solid #4a4a4a !important; color: #fff !important;
+        background-color: var(--dropdown-bg) !important; 
+        border: 1px solid #4a4a4a !important; 
+        color: var(--text-color) !important;
     }
     
-    /* Comprehensive dropdown fixes for different Streamlit versions */
-    [data-baseweb="select"] ul, [data-baseweb="menu"], 
-    .stSelectbox div[data-baseweb="select"] ul,
-    .stSelectbox div[data-baseweb="popover"] div[data-baseweb="menu"] { 
-        background-color: #2a2a2a !important; 
+    /* TARGETED DROPDOWN FIXES - Only target dropdown menus, not all selectbox content */
+    
+    /* Target dropdown containers when they're open */
+    [data-baseweb="popover"] [data-baseweb="menu"],
+    [data-baseweb="select"] [data-baseweb="menu"],
+    div[role="listbox"],
+    ul[role="listbox"] { 
+        background-color: var(--dropdown-bg) !important; 
         border: 1px solid #4a4a4a !important;
-        color: #fff !important;
+        color: var(--text-color) !important;
     }
     
-    [data-baseweb="select"] li, [data-baseweb="menu"] li,
-    .stSelectbox div[data-baseweb="select"] li,
-    .stSelectbox div[data-baseweb="popover"] div[data-baseweb="menu"] li,
-    div[role="option"] { 
-        background-color: #2a2a2a !important; 
-        color: #fff !important; 
+    /* Target dropdown option items specifically */
+    [data-baseweb="popover"] [data-baseweb="menu"] li,
+    [data-baseweb="select"] [data-baseweb="menu"] li,
+    div[role="option"],
+    li[role="option"] { 
+        background-color: var(--dropdown-bg) !important; 
+        color: var(--text-color) !important; 
         padding: 8px 12px !important;
+        border: none !important;
     }
     
-    [data-baseweb="select"] li:hover, [data-baseweb="menu"] li:hover,
-    .stSelectbox div[data-baseweb="select"] li:hover,
-    .stSelectbox div[data-baseweb="popover"] div[data-baseweb="menu"] li:hover,
-    div[role="option"]:hover { 
-        background-color: #444 !important; 
-        color: #fff !important; 
+    /* Hover states for dropdown options */
+    [data-baseweb="popover"] [data-baseweb="menu"] li:hover,
+    [data-baseweb="select"] [data-baseweb="menu"] li:hover,
+    div[role="option"]:hover,
+    li[role="option"]:hover { 
+        background-color: var(--dropdown-hover) !important; 
+        color: var(--text-color) !important; 
     }
     
-    /* Additional CSS class targeting */
-    .css-1wa3eu0-placeholder, .css-1dimb5e-singleValue { color: #fff !important; }
-    .css-26l3qy-menu, .css-1n7v3ny-menu { background-color: #2a2a2a !important; border: 1px solid #4a4a4a !important; }
-    .css-tr4s17-option, .css-d7l1ni-option { background-color: #2a2a2a !important; color: #fff !important; }
-    .css-tr4s17-option:hover, .css-d7l1ni-option:hover { background-color: #444 !important; color: #fff !important; }
+    /* Target specific CSS classes for dropdown options (but not labels) */
+    .css-tr4s17-option, .css-d7l1ni-option { 
+        background-color: var(--dropdown-bg) !important; 
+        color: var(--text-color) !important; 
+    }
+    .css-tr4s17-option:hover, .css-d7l1ni-option:hover { 
+        background-color: var(--dropdown-hover) !important; 
+        color: var(--text-color) !important; 
+    }
     
-    /* Force style on any dropdown container */
-    .stSelectbox [data-baseweb] * { color: #fff !important; }
+    /* Target dropdown menu containers */
+    .css-26l3qy-menu, .css-1n7v3ny-menu { 
+        background-color: var(--dropdown-bg) !important; 
+        border: 1px solid #4a4a4a !important; 
+    }
     
-    .stButton button { background-color: #333 !important; color: #fff !important; border: 1px solid #4a4a4a !important; }
+    /* Selected value and placeholder - only text color, preserve background */
+    .css-1wa3eu0-placeholder, .css-1dimb5e-singleValue { 
+        color: var(--text-color) !important; 
+        background: transparent !important;
+    }
+    
+    /* Buttons and interactive elements */
+    .stButton button { 
+        background-color: #333 !important; 
+        color: var(--text-color) !important; 
+        border: 1px solid #4a4a4a !important; 
+    }
     .stButton button:hover { background-color: #444 !important; }
-    .stSuccess, .stError, .stInfo, .stWarning { background-color: #2a2a2a !important; color: #fff !important; }
-    .stMarkdown, .stText, p, span, div, [data-testid="stSidebar"] * { color: #fff !important; }
+    
+    /* Status messages - PRESERVE their original backgrounds */
+    .stSuccess { 
+        color: var(--text-color) !important; 
+        /* Don't override background - let Streamlit's green show through */
+    }
+    .stError { 
+        color: var(--text-color) !important; 
+        /* Don't override background - let Streamlit's red show through */
+    }
+    .stInfo { 
+        color: var(--text-color) !important; 
+        /* Don't override background - let Streamlit's blue show through */
+    }
+    .stWarning { 
+        color: var(--text-color) !important; 
+        /* Don't override background - let Streamlit's yellow show through */
+    }
+    
+    /* All text elements - but preserve backgrounds */
+    .stMarkdown, .stText, p, span, div, 
+    [data-testid="stSidebar"] *:not(.stSuccess):not(.stInfo):not(.stError):not(.stWarning) { 
+        color: var(--text-color) !important; 
+    }
+    
+    /* Chat messages */
+    .stChatMessage, .stChatMessage * {
+        color: var(--text-color) !important;
+    }
+    
+    /* Expander and other components */
+    .streamlit-expanderHeader, .streamlit-expanderContent,
+    .stExpander *, summary * {
+        color: var(--text-color) !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
