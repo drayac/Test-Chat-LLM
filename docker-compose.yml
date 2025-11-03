@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  groq-chat:
+    build: .
+    ports:
+      - "8510:8510"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    container_name: llm-library-chat
+    
+    # Optional: Add resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M

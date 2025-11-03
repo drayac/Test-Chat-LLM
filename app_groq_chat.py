@@ -7,11 +7,16 @@ import requests
 import random
 import string
 from groq import Groq
-from dotenv import load_dotenv
 
-# Load environment variables from .env file using absolute path
-env_path = "/Users/acoudray/AlitheaGenomics/r&d/app_test_groq/.env"
-load_dotenv(dotenv_path=env_path)
+# Optional dotenv import for local development
+try:
+    from dotenv import load_dotenv
+    # Load environment variables from .env file using absolute path
+    env_path = "/Users/acoudray/AlitheaGenomics/r&d/app_test_groq/.env"
+    load_dotenv(dotenv_path=env_path)
+except ImportError:
+    # dotenv not available, skip loading .env file
+    pass
 
 # Initialize Groq client with secure API key handling
 def get_api_key():
