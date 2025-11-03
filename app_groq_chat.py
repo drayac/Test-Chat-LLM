@@ -118,21 +118,27 @@ def generate_guest_id():
     """Generate a random guest ID"""
     return "Guest_" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
 
-# Get models on app start
-GROQ_MODELS = get_groq_models()
+# Get models on app start - cache to avoid repeated API calls
+@st.cache_data(ttl=3600)  # Cache for 1 hour
+def get_cached_groq_models():
+    """Cached version of get_groq_models to reduce memory usage"""
+    return get_groq_models()
 
 # Authentication functions
+@st.cache_data(ttl=300)  # Cache for 5 minutes
 def load_user_data():
-    """Load user data from JSON file"""
+    """Load user data from JSON file with caching"""
     if os.path.exists("users.json"):
         with open("users.json", "r") as f:
             return json.load(f)
     return {}
 
 def save_user_data(data):
-    """Save user data to JSON file"""
+    """Save user data to JSON file and clear cache"""
     with open("users.json", "w") as f:
         json.dump(data, f, indent=2)
+    # Clear the cache when data is updated
+    load_user_data.clear()
 
 def hash_password(password):
     """Hash password using SHA256"""
@@ -180,7 +186,15 @@ def create_guest_user():
     return guest_id
 
 def cleanup_guest_users():
-    """Remove guest users from storage"""
+    """Remove guest users from storage - optimized to run less frequently"""
+    # Only cleanup every 10th session to reduce overhead
+    if "cleanup_counter" not in st.session_state:
+        st.session_state.cleanup_counter = 0
+    
+    st.session_state.cleanup_counter += 1
+    if st.session_state.cleanup_counter % 10 != 0:
+        return  # Skip cleanup most of the time
+    
     users = load_user_data()
     current_session_id = st.session_state.get("session_id", "")
     
@@ -194,7 +208,9 @@ def cleanup_guest_users():
             # Keep current session guest
             cleaned_users[email] = user_data
     
-    save_user_data(cleaned_users)
+    # Only save if there's actually a difference to reduce I/O
+    if len(cleaned_users) != len(users):
+        save_user_data(cleaned_users)
 
 def save_user_prompt(email, prompt, response, model):
     """Save user prompt and response to history"""
@@ -208,11 +224,13 @@ def save_user_prompt(email, prompt, response, model):
         })
         save_user_data(users)
 
-def get_user_history(email):
-    """Get user chat history"""
+def get_user_history(email, limit=10):
+    """Get user chat history with memory optimization"""
     users = load_user_data()
     if email in users:
-        return users[email]["chat_history"]
+        # Only return the last 'limit' entries to save memory
+        history = users[email]["chat_history"]
+        return history[-limit:] if len(history) > limit else history
     return []
 
 # Streamlit configuration
@@ -223,156 +241,33 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Dark theme CSS styling
+# Dark theme CSS styling - optimized for memory
 st.markdown("""
     <style>
-    /* Main app background */
-    .stApp {
-        background-color: #000000 !important;
-        color: #ffffff !important;
+    .stApp { background-color: #000 !important; color: #fff !important; }
+    #MainMenu, footer, header { visibility: hidden; }
+    .main-title { 
+        color: #fff !important; font-size: 3.2rem !important; font-weight: 700 !important;
+        text-align: center !important; margin: 0 !important; padding: 1.5rem 0 !important;
+        background: linear-gradient(135deg, #fff 0%, #e0e0e0 100%) !important;
+        -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important;
     }
-
-    /* Hide streamlit elements */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-
-    /* Title styling */
-    .main-title {
-        color: #ffffff !important;
-        font-size: 3.2rem !important;
-        font-weight: 700 !important;
-        font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif !important;
-        text-align: center !important;
-        margin: 0 !important;
-        padding: 1.5rem 0 !important;
-        background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        background-clip: text !important;
-        letter-spacing: -0.02em !important;
-        text-shadow: 0 2px 4px rgba(255,255,255,0.1) !important;
+    .css-1d391kg, .css-1cypcdb, [data-testid="stSidebar"] { background-color: #1a1a1a !important; }
+    .stSelectbox label, .stTextInput label, .stTextArea label { color: #fff !important; }
+    .stSelectbox div[data-baseweb="select"] > div, .stTextInput input, .stTextArea textarea {
+        background-color: #2a2a2a !important; border: 1px solid #4a4a4a !important; color: #fff !important;
     }
-
-    /* Sidebar styling */
-    .css-1d391kg, .css-1cypcdb {
-        background-color: #1a1a1a !important;
-    }
-    
-    .sidebar-section {
-        background-color: #2a2a2a !important;
-        padding: 1rem !important;
-        border-radius: 8px !important;
-        margin-bottom: 1rem !important;
-    }
-
-    /* Form elements */
-    .stSelectbox label, .stTextInput label, .stTextArea label {
-        color: #ffffff !important;
-        font-weight: 500 !important;
-    }
-
-    .stSelectbox div[data-baseweb="select"] > div {
-        background-color: #2a2a2a !important;
-        border: 1px solid #4a4a4a !important;
-        color: #ffffff !important;
-    }
-
-    /* Fix dropdown menu options readability */
-    .stSelectbox div[data-baseweb="select"] ul {
-        background-color: #2a2a2a !important;
-        border: 1px solid #4a4a4a !important;
-    }
-    
-    .stSelectbox div[data-baseweb="select"] li {
-        background-color: #2a2a2a !important;
-        color: #ffffff !important;
-    }
-    
-    .stSelectbox div[data-baseweb="select"] li:hover {
-        background-color: #444444 !important;
-        color: #ffffff !important;
-    }
-    
-    /* Additional selectbox styling for better contrast */
-    [data-baseweb="select"] {
-        background-color: #2a2a2a !important;
-    }
-    
-    [data-baseweb="select"] > div {
-        background-color: #2a2a2a !important;
-        color: #ffffff !important;
-        border: 1px solid #4a4a4a !important;
-    }
-    
-    [data-baseweb="popover"] {
-        background-color: #2a2a2a !important;
-    }
-    
-    [data-baseweb="menu"] {
-        background-color: #2a2a2a !important;
-    }
-    
-    [data-baseweb="menu"] li {
-        background-color: #2a2a2a !important;
-        color: #ffffff !important;
-    }
-    
-    [data-baseweb="menu"] li:hover {
-        background-color: #444444 !important;
-        color: #ffffff !important;
-    }
-
-    .stTextInput input, .stTextArea textarea {
-        background-color: #2a2a2a !important;
-        border: 1px solid #4a4a4a !important;
-        color: #ffffff !important;
-    }
-
-    /* Buttons */
-    .stButton button {
-        background-color: #333333 !important;
-        color: #ffffff !important;
-        border: 1px solid #4a4a4a !important;
-        border-radius: 6px !important;
-    }
-
-    .stButton button:hover {
-        background-color: #444444 !important;
-        border-color: #5a5a5a !important;
-    }
-
-    /* Chat messages */
-    .stChatMessage {
-        background-color: #1a1a1a !important;
-        border: 1px solid #333333 !important;
-        border-radius: 8px !important;
-    }
-
-    /* Success/error messages */
-    .stSuccess, .stError, .stInfo, .stWarning {
-        background-color: #2a2a2a !important;
-        color: #ffffff !important;
-        border-radius: 6px !important;
-    }
-
-    /* All text white */
-    .stMarkdown, .stText, p, span, div {
-        color: #ffffff !important;
-    }
-
-    /* Override any remaining white backgrounds */
-    [data-testid="stSidebar"] {
-        background-color: #1a1a1a !important;
-    }
-    
-    [data-testid="stSidebar"] * {
-        color: #ffffff !important;
-    }
+    [data-baseweb="select"] ul, [data-baseweb="menu"] { background-color: #2a2a2a !important; }
+    [data-baseweb="select"] li, [data-baseweb="menu"] li { background-color: #2a2a2a !important; color: #fff !important; }
+    [data-baseweb="select"] li:hover, [data-baseweb="menu"] li:hover { background-color: #444 !important; }
+    .stButton button { background-color: #333 !important; color: #fff !important; border: 1px solid #4a4a4a !important; }
+    .stButton button:hover { background-color: #444 !important; }
+    .stSuccess, .stError, .stInfo, .stWarning { background-color: #2a2a2a !important; color: #fff !important; }
+    .stMarkdown, .stText, p, span, div, [data-testid="stSidebar"] * { color: #fff !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# Initialize session state
+# Initialize session state with memory optimization
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if "user_email" not in st.session_state:
@@ -383,11 +278,11 @@ if "show_login" not in st.session_state:
     st.session_state.show_login = False
 if "guest_mode" not in st.session_state:
     st.session_state.guest_mode = True
-    # Automatically create a guest user on app start
-    guest_id = create_guest_user()
-    cleanup_guest_users()  # Clean up old guest users
+    # Only create guest user if not already authenticated
+    if not st.session_state.authenticated:
+        guest_id = create_guest_user()
 
-# Clean up guest users periodically
+# Clean up guest users less frequently to reduce overhead
 cleanup_guest_users()
 
 # Main page title
@@ -399,7 +294,8 @@ st.markdown("""
 
 # Model selection - available to all users
 # Get sorted list of model IDs (original names), filtered to exclude certain models
-all_models = list(GROQ_MODELS.keys())
+groq_models = get_cached_groq_models()
+all_models = list(groq_models.keys())
 filtered_models = [model for model in all_models 
                   if not model.startswith('allam') and not model.startswith('playai')]
 available_models = sorted(filtered_models)
@@ -535,12 +431,12 @@ with st.sidebar:
                         st.session_state.user_email = login_email
                         st.session_state.guest_mode = False
                         st.session_state.show_login = False
-                        # Load user's chat history
-                        user_history = get_user_history(login_email)
+                        # Load user's chat history (limit to last 5 to save memory)
+                        user_history = get_user_history(login_email, limit=5)
                         if user_history:
                             # Convert user history to chat format
                             st.session_state.chat_history = []
-                            for entry in user_history[-10:]:  # Show last 10 conversations
+                            for entry in user_history:  # Already limited to 5
                                 st.session_state.chat_history.append({"role": "user", "content": entry["prompt"]})
                                 st.session_state.chat_history.append({"role": "assistant", "content": entry["response"]})
                         st.rerun()
@@ -593,14 +489,14 @@ with st.sidebar:
             guest_id = create_guest_user()
             st.rerun()
     
-    # Chat history display for all users (including guests)
+    # Chat history display for all users (including guests) - limit to save memory
     st.markdown("### 📜 Chat History")
     
-    user_history = get_user_history(st.session_state.user_email)
+    user_history = get_user_history(st.session_state.user_email, limit=5)  # Reduce from 10 to 5
     if user_history:
-        for i, entry in enumerate(reversed(user_history[-10:])):  # Show last 10
+        for i, entry in enumerate(reversed(user_history)):  # Already limited to 5
             with st.expander(f"Chat {len(user_history)-i}", expanded=False):
-                st.write(f"**Prompt:** {entry['prompt'][:100]}...")
+                st.write(f"**Prompt:** {entry['prompt'][:50]}...")  # Reduce from 100 to 50 chars
                 st.write(f"**Model:** {entry['model']}")
                 st.write(f"**Date:** {entry['timestamp'][:19]}")
     else:
