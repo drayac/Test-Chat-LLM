@@ -1,6 +1,7 @@
 [server]
 # Port where the server will listen for browser connections
-port = 8510
+# Use default port for cloud deployment compatibility
+# port = 8501  # Commented out to use Streamlit's default
 
 # The address where the server will listen for client and browser connections
 address = "0.0.0.0"
