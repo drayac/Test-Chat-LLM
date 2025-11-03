@@ -467,10 +467,10 @@ if send_button:
             # Add user message to chat history
             st.session_state.chat_history.append({"role": "user", "content": user_input})
             
-            # Prepare messages with system prompt for response length control
+            # Prepare messages with gentle response length guidance
             system_prompt = {
                 "role": "system", 
-                "content": "You MUST keep your responses very short and concise. Maximum 200 words total. Maximum 3 paragraphs. Be direct and to the point. Do not elaborate unnecessarily. Stop writing when you reach the limit."
+                "content": "Please provide helpful and informative responses. Try to keep your answers reasonably concise when possible, but feel free to elaborate when needed to fully address the question."
             }
             
             # Combine system prompt with chat history
@@ -480,7 +480,6 @@ if send_button:
             response = client.chat.completions.create(
                 model=model,
                 messages=messages_for_api,
-                max_tokens=300,  # Enforce shorter responses (~200 words)
                 temperature=0.7
             )
             
