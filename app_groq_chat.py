@@ -262,25 +262,42 @@ st.markdown("""
     .stSelectbox div[data-baseweb="select"] > div, .stTextInput input, .stTextArea textarea {
         background-color: #2a2a2a !important; border: 1px solid #4a4a4a !important; color: #fff !important;
     }
-    /* Fix model selection dropdown visibility */
-    [data-baseweb="select"] ul, [data-baseweb="menu"] { 
+    
+    /* Comprehensive dropdown fixes for different Streamlit versions */
+    [data-baseweb="select"] ul, [data-baseweb="menu"], 
+    .stSelectbox div[data-baseweb="select"] ul,
+    .stSelectbox div[data-baseweb="popover"] div[data-baseweb="menu"] { 
         background-color: #2a2a2a !important; 
         border: 1px solid #4a4a4a !important;
+        color: #fff !important;
     }
-    [data-baseweb="select"] li, [data-baseweb="menu"] li { 
+    
+    [data-baseweb="select"] li, [data-baseweb="menu"] li,
+    .stSelectbox div[data-baseweb="select"] li,
+    .stSelectbox div[data-baseweb="popover"] div[data-baseweb="menu"] li,
+    div[role="option"] { 
         background-color: #2a2a2a !important; 
         color: #fff !important; 
         padding: 8px 12px !important;
     }
-    [data-baseweb="select"] li:hover, [data-baseweb="menu"] li:hover { 
+    
+    [data-baseweb="select"] li:hover, [data-baseweb="menu"] li:hover,
+    .stSelectbox div[data-baseweb="select"] li:hover,
+    .stSelectbox div[data-baseweb="popover"] div[data-baseweb="menu"] li:hover,
+    div[role="option"]:hover { 
         background-color: #444 !important; 
         color: #fff !important; 
     }
-    /* Additional dropdown fixes */
+    
+    /* Additional CSS class targeting */
     .css-1wa3eu0-placeholder, .css-1dimb5e-singleValue { color: #fff !important; }
-    .css-26l3qy-menu { background-color: #2a2a2a !important; border: 1px solid #4a4a4a !important; }
-    .css-tr4s17-option { background-color: #2a2a2a !important; color: #fff !important; }
-    .css-tr4s17-option:hover { background-color: #444 !important; color: #fff !important; }
+    .css-26l3qy-menu, .css-1n7v3ny-menu { background-color: #2a2a2a !important; border: 1px solid #4a4a4a !important; }
+    .css-tr4s17-option, .css-d7l1ni-option { background-color: #2a2a2a !important; color: #fff !important; }
+    .css-tr4s17-option:hover, .css-d7l1ni-option:hover { background-color: #444 !important; color: #fff !important; }
+    
+    /* Force style on any dropdown container */
+    .stSelectbox [data-baseweb] * { color: #fff !important; }
+    
     .stButton button { background-color: #333 !important; color: #fff !important; border: 1px solid #4a4a4a !important; }
     .stButton button:hover { background-color: #444 !important; }
     .stSuccess, .stError, .stInfo, .stWarning { background-color: #2a2a2a !important; color: #fff !important; }
