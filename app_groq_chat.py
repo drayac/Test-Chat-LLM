@@ -7,9 +7,35 @@ import requests
 import random
 import string
 from groq import Groq
+from dotenv import load_dotenv
 
-# Initialize Groq client with embedded API key
-GROQ_API_KEY = "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"
+# Load environment variables from .env file using absolute path
+env_path = "/Users/acoudray/AlitheaGenomics/r&d/app_test_groq/.env"
+load_dotenv(dotenv_path=env_path)
+
+# Initialize Groq client with secure API key handling
+def get_api_key():
+    """Get API key from multiple sources in order of preference"""
+    # 1. Environment variable (production)
+    if os.getenv("GROQ_API_KEY"):
+        return os.getenv("GROQ_API_KEY")
+    
+    # 2. Streamlit secrets (Streamlit Cloud)
+    try:
+        if hasattr(st, 'secrets') and "GROQ_API_KEY" in st.secrets:
+            return st.secrets["GROQ_API_KEY"]
+    except:
+        pass
+    
+    # 3. Demo fallback (with warning) - REPLACE WITH YOUR KEY
+    return "gsk_YOUR_API_KEY_HERE_REPLACE_THIS_PLACEHOLDER"
+
+GROQ_API_KEY = get_api_key()
+
+# Warn if using demo key
+if GROQ_API_KEY == "gsk_YOUR_API_KEY_HERE_REPLACE_THIS_PLACEHOLDER":
+    print("⚠️  WARNING: Using placeholder API key. Set GROQ_API_KEY environment variable for production!")
+
 client = Groq(api_key=GROQ_API_KEY)
 
 # Function to fetch available models from Groq API

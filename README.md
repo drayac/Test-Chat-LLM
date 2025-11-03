@@ -68,23 +68,51 @@ groq>=0.4.0
 requests>=2.31.0
 ```
 
-## 🔧 Configuration
+## 🔧 Configuration & Security
 
-### API Key Setup
+### 🔐 API Key Setup (IMPORTANT!)
 
-The app uses an embedded Groq API key for demonstration purposes. For production deployment:
+**⚠️ Never commit your API key to GitHub!**
 
+#### Quick Security Setup:
+```bash
+# Run the security setup script
+chmod +x setup_security.sh
+./setup_security.sh
+
+# Edit .env file with your actual API key
+nano .env
+```
+
+#### Manual Setup:
 1. **Get your Groq API key** from [Groq Console](https://console.groq.com/)
-
-2. **Replace the API key** in `app_groq_chat.py`:
-   ```python
-   GROQ_API_KEY = "your-api-key-here"
+2. **Create .env file**:
+   ```bash
+   echo "GROQ_API_KEY=your-actual-key-here" > .env
    ```
+3. **Verify .env is in .gitignore** ✅ (already included)
 
-3. **Or use environment variables** (recommended for production):
-   ```python
-   GROQ_API_KEY = os.getenv("GROQ_API_KEY", "fallback-key")
-   ```
+#### Alternative Methods:
+- **Environment variable**: `export GROQ_API_KEY="your-key"`
+- **Streamlit secrets**: Add to `.streamlit/secrets.toml`
+
+### 🚀 Deployment Security
+
+**Streamlit Cloud:**
+- Dashboard → Settings → Secrets → Add `GROQ_API_KEY`
+
+**Railway/Heroku:**
+```bash
+railway add GROQ_API_KEY           # Railway
+heroku config:set GROQ_API_KEY=... # Heroku
+```
+
+**Docker:**
+```bash
+docker run -e GROQ_API_KEY=your-key llm-chat
+```
+
+📖 **Full security guide**: See `API_KEY_SECURITY.md`
 
 ### Port Configuration
 

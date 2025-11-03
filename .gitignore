@@ -57,5 +57,10 @@ Thumbs.db
 .env.local
 .env.production
 
+# API Keys and Secrets
+*.key
+secrets.json
+api_keys.txt
+
 # Streamlit
 .streamlit/secrets.toml
