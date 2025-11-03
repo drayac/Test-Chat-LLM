@@ -262,9 +262,25 @@ st.markdown("""
     .stSelectbox div[data-baseweb="select"] > div, .stTextInput input, .stTextArea textarea {
         background-color: #2a2a2a !important; border: 1px solid #4a4a4a !important; color: #fff !important;
     }
-    [data-baseweb="select"] ul, [data-baseweb="menu"] { background-color: #2a2a2a !important; }
-    [data-baseweb="select"] li, [data-baseweb="menu"] li { background-color: #2a2a2a !important; color: #fff !important; }
-    [data-baseweb="select"] li:hover, [data-baseweb="menu"] li:hover { background-color: #444 !important; }
+    /* Fix model selection dropdown visibility */
+    [data-baseweb="select"] ul, [data-baseweb="menu"] { 
+        background-color: #2a2a2a !important; 
+        border: 1px solid #4a4a4a !important;
+    }
+    [data-baseweb="select"] li, [data-baseweb="menu"] li { 
+        background-color: #2a2a2a !important; 
+        color: #fff !important; 
+        padding: 8px 12px !important;
+    }
+    [data-baseweb="select"] li:hover, [data-baseweb="menu"] li:hover { 
+        background-color: #444 !important; 
+        color: #fff !important; 
+    }
+    /* Additional dropdown fixes */
+    .css-1wa3eu0-placeholder, .css-1dimb5e-singleValue { color: #fff !important; }
+    .css-26l3qy-menu { background-color: #2a2a2a !important; border: 1px solid #4a4a4a !important; }
+    .css-tr4s17-option { background-color: #2a2a2a !important; color: #fff !important; }
+    .css-tr4s17-option:hover { background-color: #444 !important; color: #fff !important; }
     .stButton button { background-color: #333 !important; color: #fff !important; border: 1px solid #4a4a4a !important; }
     .stButton button:hover { background-color: #444 !important; }
     .stSuccess, .stError, .stInfo, .stWarning { background-color: #2a2a2a !important; color: #fff !important; }
