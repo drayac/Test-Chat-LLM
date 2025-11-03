@@ -12,7 +12,7 @@ from groq import Groq
 try:
     from dotenv import load_dotenv
     # Load environment variables from .env file using absolute path
-    env_path = "/Users/acoudray/AlitheaGenomics/r&d/app_test_groq/.env"
+    env_path = ".env"
     load_dotenv(dotenv_path=env_path)
 except ImportError:
     # dotenv not available, skip loading .env file
